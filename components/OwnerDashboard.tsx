@@ -158,7 +158,7 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
   const onFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     setTxHash(null);
-
+  
     if (!contract) {
       setUploadError('Wallet not connected');
       return;
@@ -168,6 +168,7 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
       setUploadError('No file chosen');
       return;
     }
+  
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
@@ -175,27 +176,33 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
         const wb = XLSX.read(bstr, { type: 'binary' });
         const sheetName = wb.SheetNames[0];
         const ws = wb.Sheets[sheetName];
-        const jsonArr: Array<{ address: string; amount: number }> = XLSX.utils.sheet_to_json(ws);
-
+        // Excel → JSON: each row should have “address” & “amount”
+        const jsonArr: Array<{ address: string; amount: string | number }> =
+          XLSX.utils.sheet_to_json(ws);
+  
         const addresses: string[] = [];
         const amounts: number[] = [];
         for (const row of jsonArr) {
           const addr = (row as any).address?.toString().trim();
-          const amtVal = (row as any).amount;
+          // Treat amount cell as string or number
+          const rawAmt = (row as any).amount;
           if (!addr || !/^0x[a-fA-F0-9]{40}$/.test(addr)) {
             throw new Error(`Invalid address in row: ${JSON.stringify(row)}`);
           }
-          const amtNum = Number(amtVal);
-          if (isNaN(amtNum) || amtNum <= 0) {
+          const parsed = Number(rawAmt);
+          if (isNaN(parsed) || parsed <= 0) {
             throw new Error(`Invalid amount in row: ${JSON.stringify(row)}`);
           }
+          // **Force‐round down to an integer** before pushing
+          // (the contract expects a whole‐token count, not a decimal).
+          const amtNum = Math.floor(parsed);
           addresses.push(addr);
           amounts.push(amtNum);
         }
         if (addresses.length === 0) {
           throw new Error('Excel must contain at least one row');
         }
-
+  
         const catIndex = watch('category');
         const tx = await contract.allocateBatch(catIndex, addresses, amounts);
         const receipt = await tx.wait();

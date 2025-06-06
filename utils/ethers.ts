@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 import contractAbi from './contractAbi.json';
 
 // Replace with your deployed contract address
-// export const CONTRACT_ADDRESS = '0x3ed343Df44bbDC2EDcE4535c6f64884Fc83Aa83f';0xEFD337AC87EDf41A740AedD386d7f650D29D6e90
-export const CONTRACT_ADDRESS = '0xEFD337AC87EDf41A740AedD386d7f650D29D6e90';
+export const CONTRACT_ADDRESS = '0x69F8c0f7BD3268978F60111efAC47922fb68163A';
+
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null;
 let contract: ethers.Contract | null = null;
@@ -20,7 +20,10 @@ export function initEthers() {
 export async function getAllocation(address: string) {
   if (!contract) return null;
   try {
+    // The deployed contract’s Allocation struct is:
+    // (total, tgeUnlock, cliffMonths, vestingMonths, claimPerSecond, claimed, startTimestamp)
     const alloc = await contract.allocations(address);
+
     return {
       total: alloc.total.toString(),
       tgeUnlock: alloc.tgeUnlock.toString(),
@@ -52,5 +55,32 @@ export async function getBalance(address: string) {
     return balance.toString();
   } catch {
     return '0';
+  }
+}
+
+export interface CategoryInfo {
+  totalAmount: string;   // wei
+  tgePercent: number;
+  cliffMonths: number;
+  vestingMonths: number;
+  allocated: string;     // wei
+  usesPerMille: boolean;
+}
+
+/// If you still need category‐usage percentages, keep getCategoryInfo() as before:
+export async function getCategoryInfo(categoryIndex: number): Promise<CategoryInfo | null> {
+  if (!contract) return null;
+  try {
+    const info = await contract.categories(categoryIndex);
+    return {
+      totalAmount: info.totalAmount.toString(),
+      tgePercent: info.tgePercent.toNumber(),
+      cliffMonths: info.cliffMonths.toNumber(),
+      vestingMonths: info.vestingMonths.toNumber(),
+      allocated: info.allocated.toString(),
+      usesPerMille: info.usesPerMille
+    };
+  } catch {
+    return null;
   }
 }

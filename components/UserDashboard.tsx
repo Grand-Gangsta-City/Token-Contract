@@ -14,6 +14,7 @@ const UserDashboard: React.FC<{ account: string }> = ({ account }) => {
       setLoading(true);
       try {
         const alloc = await getAllocation(account);
+        console.log('Fetched allocation:', alloc);
         setAllocation(alloc);
         const bal = await getBalance(account);
         setBalance(bal);

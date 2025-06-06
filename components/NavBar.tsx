@@ -10,7 +10,7 @@ const NavBar: React.FC = () => {
         <div className="text-gold font-extrabold text-2xl animate-pulse">
           GGC
         </div>
-        <div className="text-light font-semibold text-lg">Global Gold Chain</div>
+        <div className="text-light font-semibold text-lg">Grand Gagsta City</div>
       </div>
       <div className="flex items-center space-x-4">
         <Link href="/" className="text-light hover:text-gold transition">
@@ -18,6 +18,12 @@ const NavBar: React.FC = () => {
         </Link>
         <Link href="/owner" className="text-light hover:text-gold transition">
           Owner Panel
+        </Link>
+        <Link
+          href="/change-address"
+          className="text-light hover:text-gold transition"
+        >
+          Change Address
         </Link>
         <ConnectWalletButton />
       </div>

@@ -15,7 +15,9 @@ export default function HomePage() {
         setLoadingOwner(false);
         return;
       }
+      console.log('Checking owner status for account:', account);
       const owner = await isOwner(account);
+      console.log('Owner status:', owner);
       setOwnerStatus(owner);
       setLoadingOwner(false);
     }

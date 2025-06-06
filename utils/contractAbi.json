@@ -1,0 +1,73 @@
+[
+    {
+      "inputs": [],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "beneficiary", "type": "address" },
+        { "internalType": "uint256", "name": "totalAmount", "type": "uint256" },
+        { "internalType": "uint256", "name": "tgePercent", "type": "uint256" },
+        { "internalType": "uint256", "name": "cliffMonths", "type": "uint256" },
+        { "internalType": "uint256", "name": "vestingMonths", "type": "uint256" },
+        { "internalType": "uint256", "name": "claimPerSecond", "type": "uint256" },
+        { "internalType": "uint256", "name": "startTimestamp", "type": "uint256" }
+      ],
+      "name": "setAllocation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "oldAddress", "type": "address" },
+        { "internalType": "address", "name": "newAddress", "type": "address" }
+      ],
+      "name": "changeAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "", "type": "address" }
+      ],
+      "name": "allocations",
+      "outputs": [
+        { "internalType": "uint256", "name": "total", "type": "uint256" },
+        { "internalType": "uint256", "name": "tgeUnlock", "type": "uint256" },
+        { "internalType": "uint256", "name": "cliffMonths", "type": "uint256" },
+        { "internalType": "uint256", "name": "vestingMonths", "type": "uint256" },
+        { "internalType": "uint256", "name": "claimPerSecond", "type": "uint256" },
+        { "internalType": "uint256", "name": "claimed", "type": "uint256" },
+        { "internalType": "uint256", "name": "startTimestamp", "type": "uint256" }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ],
+      "name": "balanceOf",
+      "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [ { "internalType": "address", "name": "", "type": "address" } ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+  

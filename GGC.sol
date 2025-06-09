@@ -89,7 +89,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
     event EmergencyWithdraw(address indexed to, uint256 amount);
 
     /// @notice Upon deployment, mint 1 billion GGC to this contract and initialize all categories
-    constructor() ERC20("Grand Gagsta City", "GGC") Ownable(msg.sender) {
+    constructor() ERC20("Grand Gangsta City", "GGC") Ownable(msg.sender) {
         // Mint entire 1 billion supply to the contract itself
         _mint(address(this), 1_000_000_000 * 10**decimals());
 

@@ -4,9 +4,10 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-/// @title Global Gold Chain (GGC) Token with Category‐Based Per‐Second Vesting
+/// @title Grand Gangsta City (GGC) Token with Category‐Based Per‐Second Vesting
+
 /// @notice ERC20 token where, at deployment, the owner preconfigures fixed “tokenomics” categories:
 ///   - Seed, Private, Public, Team, Advisors, Marketing, Airdrop, Reserve, Liquidity, Rewards, Development
 /// Each category has a total pool, a TGE unlock percentage, a cliff (in “months” = SECONDS_PER_MONTH intervals),

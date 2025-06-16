@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /// @title Grand Gangsta City (GGC) Token with Category‐Based Per‐Second Vesting
 
@@ -15,9 +14,9 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /// in one transaction; each allocation uses the preconfigured parameters to calculate TGE unlock and per‐second vesting.
 /// Beneficiaries then call `claim()` to receive their tokens over time. The contract is fully non‐reentrant on `claim()`.
 
-contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
+contract GGC is ERC20, ERC20Burnable, Ownable2Step {
     /// @dev “Month” length for testing; adjust to `30 days` in production.
-    uint256 public constant SECONDS_PER_MONTH = 1 minutes;
+    uint256 public constant SECONDS_PER_MONTH = 30 days;
 
     /// @notice All supported categories for tokenomics
     enum Category {
@@ -60,6 +59,9 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
     /// @dev Mapping from beneficiary address → their vesting Allocation
     mapping(address => Allocation) public allocations;
 
+    /// @dev Tracks which addresses have approved an admin‐driven migration
+    mapping(address => bool) public addressChangeApproved;
+
     /// @dev Emitted when a category is initialized at deployment
     event CategoryInitialized(
         Category indexed category,
@@ -86,9 +88,6 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
 
     /// @dev Emitted when the owner moves an allocation from one address to another
     event AddressChanged(address indexed oldAddress, address indexed newAddress);
-
-    /// @dev Emitted if the owner rescues tokens sent accidentally to this contract
-    event EmergencyWithdraw(address indexed to, uint256 amount);
 
     /// @notice Upon deployment, mint 1 billion GGC to this contract and initialize all categories
     constructor() ERC20("Grand Gangsta City", "GGC") Ownable(msg.sender) {
@@ -225,7 +224,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
         require(beneficiaries.length == amounts.length, "GGC: array length mismatch");
         CategoryInfo storage cat = categories[category];
 
-        for (uint256 i = 0; i < beneficiaries.length; i++) {
+        for (uint256 i; i < beneficiaries.length; i++) {
             address beneficiary = beneficiaries[i];
             uint256 amountTokens = amounts[i] * 10**decimals(); // convert whole GGC → wei
 
@@ -253,10 +252,9 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
             uint256 remainder = amountTokens - tgeUnlockAmount;
 
             // Compute per‐second vesting rate
-            uint256 perSecond = 0;
+            uint256 perSecond;
             if (vestM > 0) {
                 uint256 totalVestingSeconds = vestM * SECONDS_PER_MONTH;
-                require(totalVestingSeconds > 0, "GGC: invalid vesting duration");
                 perSecond = remainder / totalVestingSeconds;
             }
 
@@ -285,24 +283,20 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
     }
 
     /// @notice Beneficiary calls to claim vested tokens
-    /// @dev nonReentrant. See Allocation struct for details.
-    function claim() external nonReentrant {
+    function claim() external {
         Allocation storage a = allocations[msg.sender];
         require(a.total > 0, "GGC: no allocation");
 
         uint256 nowTs = block.timestamp;
 
-        // 1) Vesting not started if before startTimestamp
-        if (nowTs < a.startTimestamp) {
-            revert("GGC: vesting not started");
-        }
+        require(nowTs >= a.startTimestamp, "GGC: vesting not started");
 
         // 2) TGE portion unlocked
         uint256 unlockedAtTGE = a.tgeUnlock;
         uint256 remainder = a.total - unlockedAtTGE;
 
         // 3) Compute how much of remainder has vested so far
-        uint256 vestedFromRemainder = 0;
+        uint256 vestedFromRemainder;
         uint256 cliffEnd = a.startTimestamp + (a.cliffMonths * SECONDS_PER_MONTH);
 
         if (nowTs >= cliffEnd) {
@@ -334,6 +328,17 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
         emit TokensClaimed(msg.sender, claimable, nowTs);
     }
 
+    /// @notice Beneficiary must call this *first* to allow admin to call `changeAddress`
+    function approveAddressChange() external {
+        require(allocations[msg.sender].total > 0, "GGC: no allocation to approve");
+        addressChangeApproved[msg.sender] = true;
+    }
+
+    /// @notice Optional: revoke the approval if you change your mind
+    function revokeAddressChangeApproval() external {
+        addressChangeApproved[msg.sender] = false;
+    }
+
     /// @notice Owner can move an allocation from one address to another
     /// @dev Copies all fields so vesting continues seamlessly
     function changeAddress(address oldAddress, address newAddress) external onlyOwner {
@@ -343,6 +348,12 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
         Allocation storage oldAlloc = allocations[oldAddress];
         require(oldAlloc.total > 0, "GGC: no allocation old");
         require(allocations[newAddress].total == 0, "GGC: allocation exists new");
+
+         // user granted consent required
+        require(
+          addressChangeApproved[oldAddress],
+          "GGC: old address has not approved migration"
+        );
 
         allocations[newAddress] = Allocation({
             total: oldAlloc.total,
@@ -354,6 +365,9 @@ contract GGC is ERC20, ERC20Burnable, Ownable, ReentrancyGuard {
             startTimestamp: oldAlloc.startTimestamp
         });
         delete allocations[oldAddress];
+
+        // clear approval so it must be granted again for any future moves
+        addressChangeApproved[oldAddress] = false;
 
         emit AddressChanged(oldAddress, newAddress);
     }

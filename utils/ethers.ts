@@ -2,7 +2,8 @@ import { ethers } from 'ethers';
 import contractAbi from './contractAbi.json';
 
 // Replace with your deployed contract address
-export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d';
+// export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet
+  export const CONTRACT_ADDRESS = '0x8A9B2FC67D79E6Efe854f34E4de07D46B3f5C1EF'; //mainnet
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null;

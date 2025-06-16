@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Administrator\\ggc_token\\GGC_Hardhat_Setup\\contracts\\GGC.sol": {
-      "lastModificationDate": 1750104744372,
-      "contentHash": "e1abcea63abf57bd6db8faa1eeebfb33",
+      "lastModificationDate": 1750108284902,
+      "contentHash": "3646cf60b99ea275376598557a3663f0",
       "sourceName": "contracts/GGC.sol",
       "solcConfig": {
         "version": "0.8.20",

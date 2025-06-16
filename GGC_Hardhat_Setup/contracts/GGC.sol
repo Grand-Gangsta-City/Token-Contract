@@ -99,7 +99,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
 
         _initCategory(Category.Seed,       160_000_000, 1000, 3,  12);  // 10.00% TGE
         _initCategory(Category.Private,     50_000_000,  1500, 3, 12);  // 15.00%
-        _initCategory(Category.Public,      130_000_000, 4000, 1,  4);  // 40.00%
+        _initCategory(Category.Public,      130_000_000, 10000, 0,  0); // This will be transffered to launchpads and they will lock themselves    40% on TGE 1 month cliff 4 months vesting
         _initCategory(Category.Team,       100_000_000,    0, 6, 36);  //  0.00%
         _initCategory(Category.Advisors,     60_000_000,  500, 4, 24);  //  5.00%
         _initCategory(Category.Marketing,   100_000_000,  300, 3, 48);  //  3.00%

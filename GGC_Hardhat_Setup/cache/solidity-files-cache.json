@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Administrator\\ggc_token\\GGC_Hardhat_Setup\\contracts\\GGC.sol": {
-      "lastModificationDate": 1749660744882,
-      "contentHash": "ea14e3adc86caf48509cbe784a97101e",
+      "lastModificationDate": 1750101502359,
+      "contentHash": "ed70a4a02c75ecad3098f50c312c22fd",
       "sourceName": "contracts/GGC.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -32,8 +32,7 @@
       "imports": [
         "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+        "@openzeppelin/contracts/access/Ownable2Step.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
@@ -342,6 +341,44 @@
       ],
       "artifacts": [
         "IERC20Metadata"
+      ]
+    },
+    "C:\\Users\\Administrator\\ggc_token\\node_modules\\@openzeppelin\\contracts\\access\\Ownable2Step.sol": {
+      "lastModificationDate": 1749645978155,
+      "contentHash": "4c23c95621f1bdfb8c47bcb3795c53e8",
+      "sourceName": "@openzeppelin/contracts/access/Ownable2Step.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable2Step"
       ]
     }
   }

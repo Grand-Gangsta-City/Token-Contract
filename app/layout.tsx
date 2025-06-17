@@ -3,7 +3,7 @@ import NavBar from '../components/NavBar';
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Global Gold Chain (GGC)',
+  title: 'Grand Gansta City (GGC)',
   description: 'GGC Token Dashboard',
 };
 

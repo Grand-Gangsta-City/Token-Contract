@@ -18,7 +18,6 @@ interface FormValues {
 const CATEGORY_LABELS = [
   'Seed',
   'Private',
-  'Strategic',
   'Public',
   'Team',
   'Advisors',

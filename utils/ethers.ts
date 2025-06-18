@@ -3,25 +3,46 @@ import contractAbi from './contractAbi.json';
 
 // Replace with your deployed contract address
 // export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet
-  export const CONTRACT_ADDRESS = '0x1ef5bB3a03e0e2730d5b5036b743b9cD9F3C0312'; //mainnet
+export const CONTRACT_ADDRESS = '0x1ef5bB3a03e0e2730d5b5036b743b9cD9F3C0312'; //mainnet
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null;
 let contract: ethers.Contract | null = null;
 
 export function initEthers() {
-  if (!provider && typeof window !== 'undefined' && (window as any).ethereum) {
-    provider = new ethers.providers.Web3Provider((window as any).ethereum);
-    signer = provider.getSigner();
-    contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, signer);
+  if (typeof window === 'undefined') {
+    return { provider: null, signer: null, contract: null };
   }
-  return { provider, signer, contract };
+
+  const ethereum = (window as any).ethereum;
+  if (!ethereum) {
+    return { provider: null, signer: null, contract: null };
+  }
+
+  try {
+    if (!provider) {
+      provider = new ethers.providers.Web3Provider(ethereum);
+    }
+    
+    if (!signer) {
+      signer = provider.getSigner();
+    }
+    
+    if (!contract) {
+      contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, signer);
+    }
+
+    return { provider, signer, contract };
+  } catch (error) {
+    console.error('Failed to initialize ethers:', error);
+    return { provider: null, signer: null, contract: null };
+  }
 }
 
 export async function getAllocation(address: string) {
   if (!contract) return null;
   try {
-    // The deployed contract’s Allocation struct is:
+    // The deployed contract's Allocation struct is:
     // (total, tgeUnlock, cliffMonths, vestingMonths, claimPerSecond, claimed, startTimestamp)
     const alloc = await contract.allocations(address);
 
@@ -68,7 +89,7 @@ export interface CategoryInfo {
   usesPerMille: boolean;
 }
 
-/// If you still need category‐usage percentages, keep getCategoryInfo() as before:
+/// If you still need category-usage percentages, keep getCategoryInfo() as before:
 export async function getCategoryInfo(categoryIndex: number): Promise<CategoryInfo | null> {
   if (!contract) return null;
   try {

@@ -3,7 +3,7 @@ import React from 'react';
 import { useWallet } from '../hooks/useWallet';
 
 const ConnectWalletButton: React.FC = () => {
-  const { account, error } = useWallet();
+  const { account, error, connect, isConnecting } = useWallet();
 
   if (error) {
     return (
@@ -19,17 +19,11 @@ const ConnectWalletButton: React.FC = () => {
   if (!account) {
     return (
       <button
-        className="px-4 py-2 bg-gold text-dark font-semibold rounded-lg hover:scale-105 transform transition"
-        onClick={async () => {
-          try {
-            await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-            window.location.reload();
-          } catch (e: any) {
-            console.error(e.message);
-          }
-        }}
+        className="px-4 py-2 bg-gold text-dark font-semibold rounded-lg hover:scale-105 transform transition disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={connect}
+        disabled={isConnecting}
       >
-        Connect Wallet
+        {isConnecting ? 'Connecting...' : 'Connect Wallet'}
       </button>
     );
   }

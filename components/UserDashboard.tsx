@@ -10,20 +10,49 @@ const UserDashboard: React.FC<{ account: string }> = ({ account }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
     async function fetchData() {
+      if (!isMounted) return;
+      
       setLoading(true);
       try {
+        // Add timeout to prevent hanging requests
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            setError('Request timeout');
+            setLoading(false);
+          }
+        }, 30000); // 30 second timeout
+
         const alloc = await getAllocation(account);
+        if (!isMounted) return;
         console.log('Fetched allocation:', alloc);
         setAllocation(alloc);
+
         const bal = await getBalance(account);
+        if (!isMounted) return;
         setBalance(bal);
       } catch (e: any) {
-        setError('Failed to fetch allocation');
+        if (isMounted) {
+          setError(e.message || 'Failed to fetch allocation');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       }
-      setLoading(false);
     }
+
     fetchData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [account]);
 
   if (loading) {

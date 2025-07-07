@@ -17,26 +17,47 @@ const UserDashboard: React.FC<{ account: string }> = ({ account }) => {
       if (!isMounted) return;
       
       setLoading(true);
+      setError(null);
+      
       try {
         // Add timeout to prevent hanging requests
         timeoutId = setTimeout(() => {
           if (isMounted) {
-            setError('Request timeout');
+            console.error('Request timeout for account:', account);
+            setError('Request timeout - Please check your network connection and try refreshing the page');
             setLoading(false);
           }
-        }, 30000); // 30 second timeout
+        }, 60000); // Increased timeout to 60 seconds
 
+        console.log('Fetching allocation for account:', account);
         const alloc = await getAllocation(account);
         if (!isMounted) return;
+        
+        if (!alloc) {
+          console.log('No allocation found for account:', account);
+          setAllocation(null);
+          setLoading(false);
+          return;
+        }
+        
         console.log('Fetched allocation:', alloc);
         setAllocation(alloc);
 
+        console.log('Fetching balance for account:', account);
         const bal = await getBalance(account);
         if (!isMounted) return;
+        console.log('Fetched balance:', bal);
         setBalance(bal);
       } catch (e: any) {
+        console.error('Error in UserDashboard:', e);
         if (isMounted) {
-          setError(e.message || 'Failed to fetch allocation');
+          if (e.message?.includes('timeout')) {
+            setError('Request timeout - Please check your network connection and try refreshing the page');
+          } else if (e.message?.includes('user rejected')) {
+            setError('Transaction was rejected - Please try again');
+          } else {
+            setError(e.message || 'Failed to fetch allocation');
+          }
         }
       } finally {
         if (isMounted) {
@@ -59,7 +80,17 @@ const UserDashboard: React.FC<{ account: string }> = ({ account }) => {
     return <div className="mt-24 text-center text-light">Loading your data...</div>;
   }
   if (error) {
-    return <div className="mt-24 text-center text-red-500">{error}</div>;
+    return (
+      <div className="mt-24 text-center">
+        <div className="text-red-500 mb-4">{error}</div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-gold text-dark font-semibold rounded-lg hover:scale-105 transform transition"
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
   }
   if (!allocation || allocation.total === '0') {
     return (

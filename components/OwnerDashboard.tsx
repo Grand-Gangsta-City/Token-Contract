@@ -70,16 +70,23 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
 
   const selectedCategory = watch('category');
 
+  const [revokeAddress, setRevokeAddress] = useState<string>('');
+  const [revokeError, setRevokeError]       = useState<string|null>(null);
+  const [revokeSuccess, setRevokeSuccess]   = useState<string|null>(null);
+  const [revokeLoading, setRevokeLoading]   = useState<boolean>(false);
+
   // Load category info whenever selection changes
   useEffect(() => {
     async function loadCategory() {
       const info = await getCategoryInfo(selectedCategory);
+      console.log(`Loaded category ${CATEGORY_LABELS[selectedCategory]} info:`, info);
       if (info) {
         setCategoryInfo(info);
         if (info.totalAmount !== '0') {
           const allocatedBN = ethers.BigNumber.from(info.allocated);
           const totalBN = ethers.BigNumber.from(info.totalAmount);
           const pctTimes100 = allocatedBN.mul(10000).div(totalBN).toNumber();
+          console.log(`Category ${CATEGORY_LABELS[selectedCategory]} usage: ${pctTimes100 / 100}%`);
           setCategoryPercentUsed(pctTimes100 / 100);
         } else {
           setCategoryPercentUsed(0);
@@ -271,6 +278,32 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
     }
   };
 
+  const handleRevoke = async () => {
+    setRevokeError(null);
+    setRevokeSuccess(null);
+
+    if (!contract) {
+      setRevokeError('Wallet not connected');
+      return;
+    }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(revokeAddress)) {
+      setRevokeError('Invalid address');
+      return;
+    }
+
+    try {
+      setRevokeLoading(true);
+      const tx = await contract.revokeAllocation(revokeAddress);
+      const receipt = await tx.wait();
+      setRevokeSuccess(`Revoked unclaimed tokens. TxHash: ${receipt.transactionHash}`);
+      setRevokeAddress('');
+    } catch (e: any) {
+      setRevokeError(e.reason || e.message);
+    } finally {
+      setRevokeLoading(false);
+    }
+  };
+
   return (
     <div className="mt-24 px-8 max-w-2xl mx-auto space-y-12">
       <h2 className="text-3xl text-gold font-bold text-center">Owner Panel</h2>
@@ -422,9 +455,37 @@ const OwnerDashboard: React.FC<{ account: string }> = ({ account }) => {
           </div>
         )}
       </div>
+
+      {/* ───────────────────────────────────────────────────────────────
+          4) Revoke Allocation Section
+      ─────────────────────────────────────────────────────────────── */}
+      <div className="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-700">
+        <h3 className="text-2xl text-light font-semibold mb-4">Revoke Allocation</h3>
+        <div className="flex space-x-4 mb-4">
+          <input
+            type="text"
+            value={revokeAddress}
+            onChange={(e) => setRevokeAddress(e.target.value)}
+            placeholder="0xBeneficiaryToRevoke"
+            className="flex-grow px-3 py-2 bg-gray-700 text-light rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          <button
+            type="button"
+            onClick={handleRevoke}
+            disabled={revokeLoading}
+            className={`px-4 py-2 ${
+              revokeLoading ? 'bg-red-400' : 'bg-red-600 hover:bg-red-700'
+            } text-white rounded-lg font-semibold transition`}
+          >
+            {revokeLoading ? 'Revoking…' : 'Revoke'}
+          </button>
+        </div>
+        {revokeError && <div className="text-red-500 text-sm mb-2">{revokeError}</div>}
+        {revokeSuccess && <div className="text-green-400 text-sm">{revokeSuccess}</div>}
+      </div>
       
     </div>
-  );
+  ); 
 };
 
 export default OwnerDashboard;

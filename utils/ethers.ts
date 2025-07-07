@@ -2,8 +2,9 @@ import { ethers } from 'ethers';
 import contractAbi from './contractAbi.json';
 
 // Replace with your deployed contract address
-// export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet
-export const CONTRACT_ADDRESS = '0x0F206878eEE8d8Ec6788BaCE3E1f183b42dF75B9'; //mainnet
+// export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet 
+export const CONTRACT_ADDRESS = '0x41B97742CDFA0e512F385f7599319F27E2075378'; //testnet
+// export const CONTRACT_ADDRESS = '0x0F206878eEE8d8Ec6788BaCE3E1f183b42dF75B9'; //mainnet
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null;
@@ -55,6 +56,7 @@ export async function getAllocation(address: string) {
     console.log('Raw allocation response:', alloc);
 
     return {
+      category: alloc.category,
       total: alloc.total.toString(),
       tgeUnlock: alloc.tgeUnlock.toString(),
       cliffMonths: alloc.cliffMonths.toNumber(),
@@ -116,14 +118,8 @@ export async function getCategoryInfo(categoryIndex: number): Promise<CategoryIn
   if (!contract) return null;
   try {
     const info = await contract.categories(categoryIndex);
-    return {
-      totalAmount: info.totalAmount.toString(),
-      tgePercent: info.tgePercent.toNumber(),
-      cliffMonths: info.cliffMonths.toNumber(),
-      vestingMonths: info.vestingMonths.toNumber(),
-      allocated: info.allocated.toString(),
-      usesPerMille: info.usesPerMille
-    };
+    console.log('Raw category info:', info);
+    return info;
   } catch {
     return null;
   }

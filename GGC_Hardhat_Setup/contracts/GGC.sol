@@ -47,6 +47,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
 
     /// @notice Per‐beneficiary vesting allocation
     struct Allocation {
+        Category category;       //to keep record incase of tokens revoke
         uint256 total;           // total tokens (wei) allocated to this beneficiary
         uint256 tgeUnlock;       // amount unlocked at TGE (wei)
         uint256 cliffMonths;     // cliff in months
@@ -91,6 +92,9 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
 
     /// @dev Emitted when owner successfully migrates an allocation
     event AddressChanged(address indexed oldAddress, address indexed newAddress);
+
+    /// @dev Emitted when owner successfully revokes an allocation
+    event AllocationRevoked(address indexed beneficiary, uint256 unclaimed, Category category);
 
     /// @notice Deploy & initialize all 11 categories
     constructor() ERC20("Grand Gangsta City", "GGC") Ownable(msg.sender) {
@@ -164,6 +168,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
             }
 
             allocations[to] = Allocation({
+                category: category,
                 total:          amtWei,
                 tgeUnlock:      tge,
                 cliffMonths:    cat.cliffMonths,
@@ -239,6 +244,7 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
         require(addressChangeApproved[oldAddr], "GGC: no user approval");
 
         allocations[newAddr] = Allocation({
+            category: oldA.category,
             total:          oldA.total,
             tgeUnlock:      oldA.tgeUnlock,
             cliffMonths:    oldA.cliffMonths,
@@ -252,4 +258,24 @@ contract GGC is ERC20, ERC20Burnable, Ownable2Step {
 
         emit AddressChanged(oldAddr, newAddr);
     }
+
+    /// @notice Owner can revoke any unclaimed allocation and return it to its category
+    function revokeAllocation(address beneficiary) external onlyOwner {
+        Allocation storage a = allocations[beneficiary];
+        require(a.total > 0, "GGC: no allocation");
+
+        // only the un-claimed tokens can be returned
+        uint256 unclaimed = a.total - a.claimed;
+        require(unclaimed > 0, "GGC: nothing unclaimed to revoke");
+
+        // return precisely that unclaimed amount to the category’s pool
+        CategoryInfo storage cat = categories[a.category];
+        cat.allocated -= unclaimed;
+
+        // delete their allocation record
+        delete allocations[beneficiary];
+
+        emit AllocationRevoked(beneficiary, unclaimed, a.category);
+    }
+
 }

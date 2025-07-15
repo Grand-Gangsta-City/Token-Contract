@@ -3,8 +3,8 @@ import contractAbi from './contractAbi.json';
 
 // Replace with your deployed contract address
 // export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet 
-export const CONTRACT_ADDRESS = '0x41B97742CDFA0e512F385f7599319F27E2075378'; //testnet
-// export const CONTRACT_ADDRESS = '0x0F206878eEE8d8Ec6788BaCE3E1f183b42dF75B9'; //mainnet
+// export const CONTRACT_ADDRESS = '0x41B97742CDFA0e512F385f7599319F27E2075378'; //testnet
+export const CONTRACT_ADDRESS = '0x58E11d8ED38a2061361e90916540c5c32281A380'; //mainnet
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null;

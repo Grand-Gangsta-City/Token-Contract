@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useWallet } from '../../hooks/useWallet';
+import { useWallet } from '../../context/WalletContext';
 import OwnerDashboard from '../../components/OwnerDashboard';
 import { isOwner } from '../../utils/ethers';
 import ConnectWalletButton from '../../components/ConnectWalletButton';

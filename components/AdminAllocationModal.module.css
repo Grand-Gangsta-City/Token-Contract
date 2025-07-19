@@ -1,0 +1,71 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  
+  .cardWrapper {
+    transform: scale(0.8);
+    transform-origin: top center;
+    width: 220px; /* original card width */
+    height: 713px;
+    position: relative;
+    display: flex;
+  }
+
+  .modal {
+    position: relative;
+    width: 560px;
+    background: url('/Popup-1.png') no-repeat center/cover;
+    background-size: cover;
+    border-radius: 1rem;
+    padding-top: 5rem;    /* space for header */
+    /* padding-bottom: 2rem; */
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: scale(0.6); /* scale down the Figma artboard */
+    transform-origin: center center;
+  }
+  
+  /* Semi‑transparent overlay tint */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(31,41,55,0.7);
+  }
+  
+  /* Close button */
+  .closeBtn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 300;
+  }
+  
+  /* Title */
+  .title {
+    position: absolute;
+    top: 1rem;
+    width: 100%;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #000000;
+  }
+  
+  /* We re‑use your AllocationCard.module.css for field layout */
+  

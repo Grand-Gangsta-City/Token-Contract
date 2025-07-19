@@ -1,0 +1,90 @@
+.wrapper {
+    width: 100%;
+    padding: 4rem 1rem;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .root {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .card {
+    background: rgba(31, 41, 55, 0.5);
+    backdrop-filter: blur(6px);
+    border: 1px solid #374151;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+  }
+  
+  .card h3 {
+    font-family: 'Montserrat', sans-serif;
+    color: #F7FAFC;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  .fieldGroup {
+    margin-bottom: 1.5rem;
+  }
+  
+  .fieldGroup label {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    color: #F7FAFC;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .fieldGroup input,
+  .fieldGroup select {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(55, 65, 81, 0.8);
+    color: #F7FAFC;
+    border: 1px solid #4C2F13;
+    border-radius: 0.5rem;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .fieldGroup input:focus,
+  .fieldGroup select:focus {
+    outline: none;
+    border-color: #D97706;
+  }
+  
+  .submitBtn,
+  .secondaryBtn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .submitBtn {
+    background-color: #D97706; /* gold */
+    color: #1F2937;
+    border: none;
+  }
+  .submitBtn:hover {
+    transform: scale(1.05);
+  }
+  
+  .secondaryBtn {
+    background-color: #4C2F13; /* dark bg */
+    color: #F7FAFC;
+    border: 1px solid #D97706;
+    margin-left: 1rem;
+  }
+  .secondaryBtn:hover {
+    transform: scale(1.05);
+  }

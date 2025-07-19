@@ -1,10 +1,38 @@
 /* Use the @import syntax for Tailwind layers instead of @tailwind, to avoid unknownAtRules */
 @import "tailwindcss";
 
-html, body {
-  background-color: #1A202C; /* Replace bg-dark with its Tailwind equivalent */
-  color: #F7FAFC; /* Replace text-light with its Tailwind equivalent */
-  font-family: 'Inter', sans-serif;
+@layer base {
+  html, body {
+    min-height: 100vh;
+    overflow-x: hidden;   /* no horizontal scroll */
+    /* overflow-y: hidden;          */
+  }
+
+  body {
+    /* MOBILE: use a mobile‑optimized crop or smaller file */
+    background-image: url('/BG.png');
+    background-size: cover;
+    background-position: top center;  /* shift focal point upward on phones */
+    background-repeat: no-repeat;
+    background-color: #1A202C; /* Replace bg-dark with its Tailwind equivalent */
+    color: #F7FAFC; /* Replace text-light with its Tailwind equivalent */
+    font-family: 'Inter', sans-serif;
+  }
+
+  select option {
+    margin: 40px;
+    background: rgb(201, 152, 47);
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  /* DESKTOP (>= 768px): swap in the full‑res artwork */
+  @media (min-width: 768px) {
+    body {
+      background-image: url('/BG.png');
+      background-position: center center; /* center on larger screens */
+    }
+  }
 }
 
 /* Custom scrollbar */

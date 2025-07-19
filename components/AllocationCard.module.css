@@ -1,0 +1,103 @@
+.root {
+  position: absolute;
+  width: 645px;
+  height: 813px;
+  left: 0;
+  top: 0;
+}
+
+.popup {
+  position: absolute;
+  width: 645px;
+  height: 813px;
+  left: 0;
+  top: 0;
+  background: url('/Popup-1.png') no-repeat center/cover;
+  opacity: 0.8;
+}
+
+.title {
+  position: absolute;
+  width: 240px;
+  height: 37px;
+  left: calc(50% - 120px - 0.5px);
+  top: 36px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 37px;
+  color: #000000;
+  text-align: center;
+}
+
+.field {
+  position: absolute;
+  width: 549px;
+  height: 85px;
+  left: 48px;
+}
+
+.fieldBg {
+  position: absolute;
+  width: 549px;
+  height: 49px;
+  left: calc(50% - 274.5px);
+  top: 36px;
+  background: url('/Text-Field.png') no-repeat center/cover;
+}
+
+.fieldLabel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 24px;
+  color: #000000;
+}
+
+.fieldValue {
+  position: absolute;
+  top: 46px;
+  left: 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+.claimButtonWrapper {
+  position: absolute;
+  width: 544px;
+  height: 59px;
+  left: calc(50% - 272px - 2.5px);
+  bottom: 46px;
+}
+
+.claimButtonBg {
+  position: absolute;
+  width: 544px;
+  height: 59px;
+  left: 0;
+  top: 0;
+  background: url('/Brows-File-Button-Plain.png') no-repeat center/cover;
+  opacity: 0.7;
+}
+
+.claimButtonText {
+  position: absolute;
+  width: 160px;
+  height: 24px;
+  left: calc(50% - 80px);
+  top: 18px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 24px;
+  color: #D4D4D4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}

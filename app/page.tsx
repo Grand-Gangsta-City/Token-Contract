@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useWallet } from '../hooks/useWallet';
+import { useWallet } from '../context/WalletContext';
 import UserDashboard from '../components/UserDashboard';
 import { isOwner } from '../utils/ethers';
 import ConnectWalletButton from '../components/ConnectWalletButton';
@@ -20,9 +20,9 @@ export default function HomePage() {
         }
         return;
       }
-      console.log('Checking owner status for account:', account);
+      // console.log('Checking owner status for account:', account);
       const owner = await isOwner(account);
-      console.log('Owner status:', owner);
+      // console.log('Owner status:', owner);
       if (mounted) {
         setOwnerStatus(owner);
         setLoadingOwner(false);
@@ -72,5 +72,5 @@ export default function HomePage() {
     );
   }
 
-  return <UserDashboard account={account} />;
+  return <UserDashboard />;
 }

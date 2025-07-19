@@ -1,9 +1,22 @@
 'use client';
-import React from 'react';
-import { useWallet } from '../hooks/useWallet';
+import React, { useState } from 'react';
+import { useWallet } from '../context/WalletContext';
+import { X } from 'lucide-react';
+import Image from 'next/image';
+import styles from './ConnectWalletModal.module.css';
 
-const ConnectWalletButton: React.FC = () => {
-  const { account, error, connect, isConnecting } = useWallet();
+export default function ConnectWalletButton() {
+  const {
+    account,
+    accounts,
+    error,
+    connect,
+    disconnect,
+    selectAccount,
+    isConnecting,
+  } = useWallet();
+
+  const [showModal, setShowModal] = useState(false);
 
   if (error) {
     return (
@@ -29,10 +42,78 @@ const ConnectWalletButton: React.FC = () => {
   }
 
   return (
-    <div className="px-4 py-2 bg-dark text-gold font-mono rounded-lg border border-gold">
-      {account.slice(0, 6)}...{account.slice(-4)}
-    </div>
-  );
-};
+    <>
+      <button
+        onClick={() => setShowModal(true)}
+        className="px-4 py-2 bg-dark text-gold font-mono rounded-lg border border-gold flex items-center space-x-2"
+      >
+        <img
+          src="/GGClogo.png"
+          alt="logo"
+          width={16}
+          height={16}
+        />
+        <span>
+          {account.slice(0, 6)}...{account.slice(-4)}
+        </span>
+      </button>
 
-export default ConnectWalletButton;
+      {showModal && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className={styles.modalContainer}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className={styles.modalOverlay} />
+            <div className={styles.modalContent}>
+              <div className={styles.header}>
+                <Image
+                  src="/GGClogo.png"
+                  alt="GGC"
+                  width={24}
+                  height={24}
+                  className={styles.logoIcon}
+                />
+                <span>Connected Accounts</span>
+                <button onClick={() => setShowModal(false)}>
+                  <X className="h-5 w-5 text-light" />
+                </button>
+              </div>
+
+              <ul className={styles.addressList}>
+                {accounts.map(addr => (
+                  <li key={addr}>
+                    <div
+                      onClick={() => {
+                        selectAccount(addr);
+                        setShowModal(false);
+                      }}
+                      className={`${styles.addressItem} ${
+                        addr === account ? styles.active : ''
+                      }`}
+                    >
+                      {addr.slice(0, 6)}...{addr.slice(-4)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                className={styles.disconnectBtn}
+                onClick={() => {
+                  disconnect();
+                  setShowModal(false);
+                }}
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

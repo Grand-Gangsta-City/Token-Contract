@@ -2,23 +2,27 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { initEthers } from '../../utils/ethers';
+// import { initEthers } from '../../utils/ethers';
+import { getContract, getSigner, getProvider } from '../../utils/ethers';
 import { ethers } from 'ethers';
 import { useForm } from 'react-hook-form';
+import { useWallet } from '../../context/WalletContext';
 
 interface ChangeForm {
   oldAddress: string;
   newAddress: string;
 }
 
-const ChangeAddressPage: React.FC = () => {
-  const { contract, provider, signer } = initEthers();
-  const [account, setAccount] = useState<string>('');
+export default function ChangeAddressPage() {
+  
+  // const [account, setAccount] = useState<string>('');
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [changeError, setChangeError] = useState<string | null>(null);
   const [changeSuccess, setChangeSuccess] = useState<string | null>(null);
-
+  const { account, isConnecting } = useWallet();
+  
+ 
   const {
     register,
     handleSubmit,
@@ -32,28 +36,36 @@ const ChangeAddressPage: React.FC = () => {
 
   // Fetch current connected account and check owner status
   useEffect(() => {
+
+    if (!account) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
     async function checkOwner() {
+      // console.log('Checking owner status for account:', account);
+      const provider = getProvider();
+      const contract = await getContract(account || undefined);
       if (!provider) {
         setLoading(false);
         return;
       }
       try {
-        // Prompt user to connect wallet if not already
-        await provider.send('eth_requestAccounts', []);
-        const signerAddr = await signer!.getAddress();
-        setAccount(signerAddr);
-
-        const contractOwner: string = await contract!.owner();
-        setIsAdmin(signerAddr.toLowerCase() === contractOwner.toLowerCase());
+        
+        const contractOwner: string = await contract.owner();
+        // console.log('Contract owner:', contractOwner);
+        setIsAdmin(account?.toLowerCase() === contractOwner.toLowerCase());
       } catch {
         setIsAdmin(false);
       }
       setLoading(false);
     }
     checkOwner();
-  }, [provider, signer, contract]);
+  }, [account]);
 
   const onChangeAddress = async (data: ChangeForm) => {
+    const contract = await getContract(account || undefined);
     setChangeError(null);
     setChangeSuccess(null);
 
@@ -99,16 +111,18 @@ const ChangeAddressPage: React.FC = () => {
 
   return (
     <div className="mt-24 px-8 max-w-lg mx-auto">
-      <h2 className="text-3xl text-gold font-bold text-center mb-8">
-        Change Allocation Address
-      </h2>
+      
 
       <form
         onSubmit={handleSubmit(onChangeAddress)}
+        style={{ background: "url('/Popup-1.png') no-repeat center/cover" }}
         className="bg-gray-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-700"
       >
+        <h2 className="text-xl uppercase text-black font-bold text-center mb-8">
+        Change Allocation Address
+      </h2>
         <div className="mb-6">
-          <label className="block text-sm font-medium text-light mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Old Address
           </label>
           <input
@@ -121,6 +135,7 @@ const ChangeAddressPage: React.FC = () => {
             })}
             type="text"
             placeholder="0xOldAddress"
+            style={{ background: "url('/Text-Field.png') no-repeat center/cover" }}
             className="w-full px-3 py-2 bg-gray-700 text-light rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
           />
           {errors.oldAddress && (
@@ -131,7 +146,7 @@ const ChangeAddressPage: React.FC = () => {
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-light mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             New Address
           </label>
           <input
@@ -144,6 +159,7 @@ const ChangeAddressPage: React.FC = () => {
             })}
             type="text"
             placeholder="0xNewAddress"
+            style={{ background: "url('/Text-Field.png') no-repeat center/cover" }}
             className="w-full px-3 py-2 bg-gray-700 text-light rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
           />
           {errors.newAddress && (
@@ -156,6 +172,7 @@ const ChangeAddressPage: React.FC = () => {
         <button
           type="submit"
           className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:scale-105 transform transition"
+          style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
         >
           Change Address
         </button>
@@ -170,5 +187,3 @@ const ChangeAddressPage: React.FC = () => {
     </div>
   );
 };
-
-export default ChangeAddressPage;

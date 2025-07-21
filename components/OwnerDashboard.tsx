@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getCategoryInfo, getAllocation, getContract, getProvider, getSigner } from '../utils/ethers';
+import { getCategoryInfo, getAllocation, getContract, getProvider, getSigner, getAirdropContract, CONTRACT_ADDRESS } from '../utils/ethers';
 import { ethers } from 'ethers';
 import * as XLSX from 'xlsx';
 import AdminAllocationModal from './AdminAllocationModal';
@@ -41,6 +41,13 @@ export default function OwnerDashboard({ account }: { account: string }) {
   const [revokeError, setRevokeError] = useState<string | null>(null);
   const [revokeSuccess, setRevokeSuccess] = useState<string | null>(null);
   const [revokeLoading, setRevokeLoading] = useState<boolean>(false);
+
+    // 4) Airdrop: single tx
+    const [airdropAddr, setAirdropAddr]   = useState('');
+    const [airdropAmt, setAirdropAmt]     = useState('');
+    const [airdropErr, setAirdropErr]     = useState<string|null>(null);
+    const [airdropLoading, setAirdropLoading] = useState(false);
+    const [airdropSuccess, setAirdropSuccess] = useState<string|null>(null);
 
   const selectedCategory = watch('category');
 
@@ -117,6 +124,8 @@ export default function OwnerDashboard({ account }: { account: string }) {
           }
         });
         if (!addresses.length) throw new Error('Excel must contain valid rows');
+        console.log('Airdrop addresses:', addresses);
+        console.log('Airdrop amounts:', amounts);
         const tx = await contract.allocateBatch(selectedCategory, addresses, amounts);
         const res = await tx.wait();
         setTxHash(res.transactionHash);
@@ -173,6 +182,55 @@ export default function OwnerDashboard({ account }: { account: string }) {
     }
       setRevokeError(e.reason);
     } finally { setRevokeLoading(false); }
+  };
+
+  // 5) Airdrop upload
+  const handleAirdropUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAirdropErr(null);
+    setAirdropSuccess(null);
+    const contract = await getAirdropContract(account || undefined);
+    const tokenContract = await getContract(account || undefined);
+    console.log('Airdrop contract:', contract);
+    console.log('Token contract:', tokenContract);
+    setUploadError(null);
+    setTxHash(null);
+    if (!contract) { setUploadError('Wallet not connected'); return; }
+    const file = e.target.files?.[0];
+    if (!file) return setAirdropErr('No file chosen');
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const wb = XLSX.read(evt.target!.result, { type: 'binary' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows: any[] = XLSX.utils.sheet_to_json(ws);
+        const addresses: string[] = [];
+        const amounts: number[] = [];
+        rows.forEach(r => {
+          const a = (r as any).address?.toString().trim();
+          const m = Number((r as any).amount);
+          if (/^0x[a-fA-F0-9]{40}$/.test(a) && m > 0) {
+            addresses.push(a);
+            amounts.push(Math.floor(m));
+          }
+        });
+        if (!addresses.length) throw new Error('Excel must contain valid rows');
+        setAirdropLoading(true);
+        
+        const tx = await contract.batchTransfer(CONTRACT_ADDRESS, addresses, amounts);
+        const res = await tx.wait();
+        setTxHash(res.transactionHash);
+      } catch (e: any) {
+         // Normalize the error code
+    const code = e.code as string;
+    // 1) User rejected in wallet
+    if (code === 'ACTION_REJECTED') {
+      alert('Transaction Rejected');
+      return;
+    }
+        setUploadError(e.message);
+      }
+    };
+    reader.readAsBinaryString(file);
   };
 
   return (
@@ -242,13 +300,13 @@ export default function OwnerDashboard({ account }: { account: string }) {
               className="w-xs h-10 bg-cover font-semibold hover:scale-105"
               style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
             >Submit Allocation</button>
-            <button
+            {/* <button
               type="button"
               className="w-xs h-10 bg-cover font-semibold hover:scale-105"
               style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
               onClick={() => document.getElementById('fileInput')?.click()}
             >Choose File</button>
-            <input id="fileInput" type="file" accept=".xls,.xlsx" hidden onChange={onFileUpload} />
+            <input id="fileInput" type="file" accept=".xls,.xlsx" hidden onChange={onFileUpload} /> */}
           </div>
 
           {parsingError && <p className="mt-4 text-red-500 text-center">{parsingError}</p>}
@@ -302,7 +360,33 @@ export default function OwnerDashboard({ account }: { account: string }) {
           </div>
           {revokeSuccess && <p className="text-green-400 text-center mt-4">{revokeSuccess}</p>}
         </div>
-
+          {/* 3) Airdrop Card */}
+      <div
+        style={{ background: "url('/Popup-1.png') no-repeat center/cover" }}
+        className="relative rounded-2xl p-2 shadow-lg border border-gray-700 max-w-full mx-auto"
+      >
+        <h3 className="text-2xl text-light font-semibold text-center mb-4">
+          Airdrop (Excel upload)
+        </h3>
+        <div className="flex justify-center">
+          <button
+            onClick={() => document.getElementById('airdropFileInput')?.click()}
+            className="w-40 h-10 bg-cover font-semibold hover:scale-105"
+            style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
+          >
+            Choose File
+          </button>
+          <input
+            id="airdropFileInput"
+            type="file"
+            accept=".xls,.xlsx"
+            hidden
+            onChange={handleAirdropUpload}
+          />
+        </div>
+        {airdropErr     && <p className="mt-2 text-red-500 text-center">{airdropErr}</p>}
+        {airdropSuccess && <p className="mt-2 text-green-400 text-center">{airdropSuccess}</p>}
+      </div>
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import './globals.css';
 import NavBar from '../components/NavBar';
-import type { ReactNode } from 'react';
 import { WalletProvider } from '../context/WalletContext';
+import ClientLayout from '@/components/ClientLayout';
 import '../public/BG.png';
 
 export const metadata = {
@@ -12,13 +12,17 @@ export const metadata = {
   },
 };
 
+
+
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
         <WalletProvider>
-          <NavBar />
-          <main className="pt-20 pb-10 px-4 md:px-8">{children}</main>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </WalletProvider>
       </body>
     </html>

@@ -6,12 +6,19 @@ import { isOwner } from '../utils/ethers';
 import ConnectWalletButton from '../components/ConnectWalletButton';
 
 export default function HomePage() {
-  const { account, isConnecting } = useWallet();
+  const { account, isConnecting, chainId } = useWallet();
   const [ownerStatus, setOwnerStatus] = React.useState<boolean>(false);
   const [loadingOwner, setLoadingOwner] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     let mounted = true;
+
+      // If not connected to Sei, skip the on‑chain check
+   if (!account || chainId !== 1329) {
+     setOwnerStatus(false);
+     setLoadingOwner(false);
+     return;
+   }
 
     async function checkOwner() {
       if (!account) {

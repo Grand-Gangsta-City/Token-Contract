@@ -14,7 +14,7 @@ import { useWallet } from '../context/WalletContext';
 import { ArrowRightLeft, XOctagon } from 'lucide-react';
 
 export default function UserDashboard() {
-  const { account } = useWallet();
+  const { account, chainId } = useWallet();
   const [allocation, setAllocation] = useState<any>(null);
   const [balance, setBalance] = useState<string>('0');
   const [loading, setLoading] = useState(true);
@@ -30,6 +30,13 @@ export default function UserDashboard() {
       setBalance('0');
       return;
     }
+
+   // If on the wrong network, show a friendly message and DON'T call getAllocation()
+   if (chainId !== 1329) {
+     setError('Please switch to the Sei network to view your allocation.');
+     setLoading(false);
+     return;
+   }
 
     // console.log('🔄 Detected account change, refetching for', account);
 

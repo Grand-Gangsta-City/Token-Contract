@@ -113,6 +113,7 @@ export default function OwnerDashboard({ account }: { account: string }) {
         const wb = XLSX.read(evt.target!.result, { type: 'binary' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows: any[] = XLSX.utils.sheet_to_json(ws);
+        // console.log('Parsed rows:', rows);
         const addresses: string[] = [];
         const amounts: number[] = [];
         rows.forEach(r => {
@@ -121,11 +122,12 @@ export default function OwnerDashboard({ account }: { account: string }) {
           if (/^0x[a-fA-F0-9]{40}$/.test(a) && m > 0) {
             addresses.push(a);
             amounts.push(Math.floor(m));
+            // console.log('Parsed address:', a, 'amount:', m);
           }
         });
         if (!addresses.length) throw new Error('Excel must contain valid rows');
-        console.log('Airdrop addresses:', addresses);
-        console.log('Airdrop amounts:', amounts);
+        // console.log('Airdrop addresses:', addresses);
+        // console.log('Airdrop amounts:', amounts);
         const tx = await contract.allocateBatch(selectedCategory, addresses, amounts);
         const res = await tx.wait();
         setTxHash(res.transactionHash);
@@ -188,50 +190,71 @@ export default function OwnerDashboard({ account }: { account: string }) {
   const handleAirdropUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setAirdropErr(null);
     setAirdropSuccess(null);
-    const contract = await getAirdropContract(account || undefined);
-    const tokenContract = await getContract(account || undefined);
-    console.log('Airdrop contract:', contract);
-    console.log('Token contract:', tokenContract);
-    setUploadError(null);
-    setTxHash(null);
-    if (!contract) { setUploadError('Wallet not connected'); return; }
+  
+    const airdrop = await getAirdropContract(account);
+    if (!airdrop) {
+      setAirdropErr('Wallet not connected');
+      return;
+    }
+  
     const file = e.target.files?.[0];
-    if (!file) return setAirdropErr('No file chosen');
+    if (!file) {
+      setAirdropErr('No file chosen');
+      return;
+    }
+  
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
         const wb = XLSX.read(evt.target!.result, { type: 'binary' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows: any[] = XLSX.utils.sheet_to_json(ws);
+  
         const addresses: string[] = [];
-        const amounts: number[] = [];
-        rows.forEach(r => {
+        const amounts: number[]  = [];
+        for (const r of rows) {
           const a = (r as any).address?.toString().trim();
           const m = Number((r as any).amount);
           if (/^0x[a-fA-F0-9]{40}$/.test(a) && m > 0) {
             addresses.push(a);
             amounts.push(Math.floor(m));
           }
-        });
-        if (!addresses.length) throw new Error('Excel must contain valid rows');
+        }
+  
+        if (addresses.length === 0) {
+          throw new Error('Excel must contain at least one valid row');
+        }
+  
         setAirdropLoading(true);
-        
-        const tx = await contract.batchTransfer(CONTRACT_ADDRESS, addresses, amounts);
-        const res = await tx.wait();
-        setTxHash(res.transactionHash);
-      } catch (e: any) {
-         // Normalize the error code
-    const code = e.code as string;
-    // 1) User rejected in wallet
-    if (code === 'ACTION_REJECTED') {
-      alert('Transaction Rejected');
-      return;
-    }
-        setUploadError(e.message);
+  
+        // **Convert all to wei here!**  
+        const amountsWei = amounts.map(n =>
+          ethers.utils.parseUnits(n.toString(), 18)
+        );
+        // console.log('Airdrop addresses:', addresses);
+        // console.log('Airdrop amounts (wei):', amountsWei);
+        // Now pass the wei array into your batchTransfer
+        const tx = await airdrop.batchTransfer(
+          CONTRACT_ADDRESS, // your token address
+          addresses,
+          amountsWei
+        );
+        const receipt = await tx.wait();
+        setAirdropSuccess(`Batch done: ${receipt.transactionHash.slice(0, 8)}…`);
+        e.target.value = '';
+      } catch (err: any) {
+        if (err.code === 'ACTION_REJECTED') {
+          setAirdropErr('User rejected');
+        } else {
+          setAirdropErr(err.message || err.toString());
+        }
+      } finally {
+        setAirdropLoading(false);
       }
     };
     reader.readAsBinaryString(file);
   };
+  
 
   return (
     <>
@@ -300,13 +323,13 @@ export default function OwnerDashboard({ account }: { account: string }) {
               className="w-xs h-10 bg-cover font-semibold hover:scale-105"
               style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
             >Submit Allocation</button>
-            {/* <button
+            <button
               type="button"
               className="w-xs h-10 bg-cover font-semibold hover:scale-105"
               style={{ background: "url('/Brows-File-Button-Plain.png') no-repeat center/cover" }}
               onClick={() => document.getElementById('fileInput')?.click()}
             >Choose File</button>
-            <input id="fileInput" type="file" accept=".xls,.xlsx" hidden onChange={onFileUpload} /> */}
+            <input id="fileInput" type="file" accept=".xls,.xlsx" hidden onChange={onFileUpload} />
           </div>
 
           {parsingError && <p className="mt-4 text-red-500 text-center">{parsingError}</p>}

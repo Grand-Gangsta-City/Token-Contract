@@ -1,14 +1,19 @@
 import { ethers } from 'ethers';
 import contractAbi from './contractAbi.json';
+import airdropAbi from './airdropAbi.json';
 
-// Replace with your deployed contract address
+// Replace with your deployed contract address 
 // export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet 
-// export const CONTRACT_ADDRESS = '0x684B3f4C0375f94B700F777c7743fe6105a2dca4'; //testnet
-export const CONTRACT_ADDRESS = '0x58E11d8ED38a2061361e90916540c5c32281A380'; //mainnet
+//export const CONTRACT_ADDRESS = '0x684B3f4C0375f94B700F777c7743fe6105a2dca4'; //testnet
+ export const CONTRACT_ADDRESS = '0x58E11d8ED38a2061361e90916540c5c32281A380'; //mainnet
+
+//GGC Airdrop Batch Contract Address 0x3EED658D0689488f8A79E06426744C982Cd4233b testnet
+const AIRDROP_BATCH_ADDR = '0x3EED658D0689488f8A79E06426744C982Cd4233b'; //testnet
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null; 
 let contract: ethers.Contract | null = null;
+let airdropContract: ethers.Contract | null = null;
 
 // export function initEthers() {
 //   if (typeof window === 'undefined') {
@@ -69,7 +74,13 @@ export async function getContract(addr?: string): Promise<ethers.Contract> {
   return contract;
 }
 
-export async function getAllocation(address: string) {
+export async function getAirdropContract(addr?: string){
+  const signer = await getSigner(addr);
+  airdropContract = new ethers.Contract(AIRDROP_BATCH_ADDR, airdropAbi, signer);
+  return airdropContract;
+}
+
+export async function getAllocation(address: string) { 
   const contract = await getContract(address);
   if (!contract) {
     // console.error('Contract not initialized in getAllocation');

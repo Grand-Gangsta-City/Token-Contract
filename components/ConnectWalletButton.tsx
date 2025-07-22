@@ -70,7 +70,7 @@ export default function ConnectWalletButton() {
             <div className={styles.modalOverlay} />
             <div className={styles.modalContent}>
               <div className={styles.header}>
-                <Image
+                <img
                   src="/GGClogo.png"
                   alt="GGC"
                   width={24}

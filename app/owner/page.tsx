@@ -1,67 +1,52 @@
 'use client';
+
 import React from 'react';
 import { useWallet } from '../../context/WalletContext';
 import OwnerDashboard from '../../components/OwnerDashboard';
-import { isOwner } from '../../utils/ethers';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
+import { isOwner, isAirdropOwner } from '../../utils/ethers';
 
 export default function OwnerPage() {
   const { account, isConnecting } = useWallet();
-  const [ownerStatus, setOwnerStatus] = React.useState<boolean>(false);
-  const [loadingOwner, setLoadingOwner] = React.useState<boolean>(true);
+  const [allowed, setAllowed] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     let mounted = true;
-
-    async function checkOwner() {
+    async function check() {
       if (!account) {
-        if (mounted) {
-          setLoadingOwner(false);
-        }
+        if (mounted) setLoading(false);
         return;
       }
-      const owner = await isOwner(account);
+      const [mainOk, airOk] = await Promise.all([
+        isOwner(account),
+        isAirdropOwner(account),
+      ]);
       if (mounted) {
-        setOwnerStatus(owner);
-        setLoadingOwner(false);
+        setAllowed(mainOk || airOk);
+        setLoading(false);
       }
     }
-    checkOwner();
-
-    return () => {
-      mounted = false;
-    };
+    check();
+    return () => { mounted = false; };
   }, [account]);
 
   if (isConnecting) {
-    return (
-      <div className="mt-24 text-center text-light">
-        Connecting to wallet...
-      </div>
-    );
+    return <div className="mt-24 text-center">Connecting wallet…</div>;
   }
-
   if (!account) {
     return (
-      <div className="mt-24 flex flex-col items-center space-y-4">
-        <div className="text-center text-light">
-          Please connect your wallet to access the Owner Panel.
-        </div>
+      <div className="mt-24 text-center">
+        <p>Please connect your wallet to access the Owner Panel.</p>
         <ConnectWalletButton />
       </div>
     );
   }
-
-  if (loadingOwner) {
-    return (
-      <div className="mt-24 text-center text-light">Verifying owner status...</div>
-    );
+  if (loading) {
+    return <div className="mt-24 text-center">Verifying permissions…</div>;
   }
-
-  if (!ownerStatus) {
-    return (
-      <div className="mt-24 text-center text-red-500">Access Denied. You are not the owner.</div>
-    );
+  if (!allowed) {
+    return <div className="mt-24 text-center text-red-500">Access denied</div>;
   }
 
   return <OwnerDashboard account={account} />;

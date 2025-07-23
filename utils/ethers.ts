@@ -4,17 +4,19 @@ import airdropAbi from './airdropAbi.json';
 
 // Replace with your deployed contract address 
 // export const CONTRACT_ADDRESS = '0xC0b6e7C06828EdDEF541ae57fd915289Ca8f892d'; //testnet 
-//export const CONTRACT_ADDRESS = '0x684B3f4C0375f94B700F777c7743fe6105a2dca4'; //testnet
+// export const CONTRACT_ADDRESS = '0x684B3f4C0375f94B700F777c7743fe6105a2dca4'; //testnet
  export const CONTRACT_ADDRESS = '0x58E11d8ED38a2061361e90916540c5c32281A380'; //mainnet
 
 //GGC Airdrop Batch Contract Address 0x3EED658D0689488f8A79E06426744C982Cd4233b testnet
-const AIRDROP_BATCH_ADDR = '0x3EED658D0689488f8A79E06426744C982Cd4233b'; //testnet
+// const AIRDROP_BATCH_ADDR = '0x3EED658D0689488f8A79E06426744C982Cd4233b'; //testnet
+const AIRDROP_BATCH_ADDR = '0x8412F44dDc9544C383648A141538E9Ed561C60F0'; //mainnet
+
 
 let provider: ethers.providers.Web3Provider | null = null;
 let signer: ethers.Signer | null = null; 
 let contract: ethers.Contract | null = null;
 let airdropContract: ethers.Contract | null = null;
-
+ 
 // export function initEthers() {
 //   if (typeof window === 'undefined') {
 //     console.log('Window is undefined, returning null provider');
@@ -128,6 +130,14 @@ export async function isOwner(address: string) {
     alert('Error checking owner status: ' + (error as Error).message);
     return false;
   }
+}
+
+export async function isAirdropOwner(account?: string): Promise<boolean> {
+  if (!account) return false;
+  const airdrop = await getAirdropContract(account);
+  if (!airdrop) return false;
+  const owner = await airdrop.owner();     // assumes your batcher contract exposes `owner()`
+  return owner.toLowerCase() === account.toLowerCase();
 }
 
 export async function getBalance(address: string) {
